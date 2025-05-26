@@ -1,56 +1,54 @@
 # House Price Prediction Project
 
 ## Abstract
-This report presents a comprehensive analysis of housing price data using various statistical methods. We describe the preprocessing steps, feature selection techniques, modeling strategies (including classical inference, ANOVA, regression, and SARIMA), and model evaluations. The analysis is supported with visualizations at each stage to help interpret the results.
+
+This report presents a complete statistical modeling pipeline applied to housing price data from the Ames dataset. After thorough preprocessing, including outlier removal and feature selection, we applied classical inference techniques and built multiple regression models to identify key predictors of sale price. We further explored interaction effects through factorial design and ANOVA. In the final phase, we treated sale prices as a time series and applied ARIMA and SARIMA models to capture temporal patterns. The best-performing model, SARIMA(0,1,1)(1,1,0,12), showed strong forecasting ability and well-behaved residuals. Our results demonstrate both accurate predictions and valuable insights into the factors driving house prices.
 
 ## Introduction
+
 The objective of this project is to predict house prices and understand the influence of different variables on these prices. The analysis involves:
 - Preprocessing a real estate dataset to handle missing values and categorical variables.
 - Selecting relevant features using statistical techniques.
 - Building predictive models using regression, ANOVA, and time series methods.
 - Evaluating the models and interpreting their outputs using both statistical indicators and visual diagnostics.
 
-## Statistical Methods and Workflow
+## Statistical Methods
 
-### Data Preprocessing
-- **Missing Values:** Strategy used (e.g. imputation, row removal) and justification.
-- **Normalization/Standardization:** Whether applied and why.
-- **Categorical Encoding:** One-hot encoding or binarization.
-- **Outlier Detection:** Methods used (e.g. IQR, z-score).
-- **Categorical Variable Encoding:**
-We identified 45 categorical variables and converted them explicitly to the category dtype. These include both ordinal (e.g., OverallQual, ExterQual) and nominal (e.g., Neighborhood, RoofStyle) features.
-- **One-Hot Encoding:**
-We applied one-hot encoding using pd.get_dummies() with drop_first=True to avoid multicollinearity due to the dummy variable trap. This transformation expanded the dataset to include binary indicator columns for each category level.
+### Data preprocessing
+
+#### Categorical Variable Encoding
+We identified 45 categorical variables and converted them explicitly to the category type. These include both ordinal (e.g., `OverallQual`) and nominal (e.g., `ExterQual`, `RoofStyle`) features.
+
+#### One-Hot Encoding
+
+We applied `one-hot encoding` using `pd.get_dummies()` with `drop_first=True` to avoid multicollinearity due to the dummy variable trap. This transformation expanded the dataset to include binary indicator columns for each category level.
+
 ### Feature Selection
-- **Exploratory Data Analysis (EDA):** Correlation heatmaps, pairplots.
-- **Recursive Feature Elimination (RFE):** Model and criteria.
-- **Factorial Design (2^k or 2^(k-p))**: Description of selected factors and interactions.
-- **ANOVA:** Application to test influence of categorical factors on SalePrice.
 
-- **Correlation Filtering:**
-We computed the Pearson correlation matrix of all numeric and one-hot-encoded variables. To reduce redundancy, we dropped all features that had a pairwise correlation above 0.75 (excluding the diagonal), which helps to reduce multicollinearity and model overfitting.
-- **Random Forest:**
-We trained a RandomForestRegressor on the encoded dataset to estimate the importance of each feature in predicting SalePrice.
+#### Correlation Filtering
+
+We computed the `Pearson correlation matrix` of all numeric and one-hot-encoded variables. To reduce redundancy, we dropped all features that had a pairwise correlation above 0.75 (excluding the diagonal), which helps to reduce multicollinearity and model overfitting.
+
+#### Random Forest
+
+We trained a `RandomForestRegressor` on the encoded dataset to estimate the importance of each feature in predicting `SalePrice`.
 We extracted the top 20 most important features, visualized via a barplot, and retained all features with importance > 0.01.
 
-%TODO: inclure le barplot
 ![Barplot of the importance of features](/figures/importance_barplot.png)
 
-- **Re-encoding ordinal values:**
-Some ordinal categorical features were previously encoded as one-hot vectors. We reintroduced two of them (ExterQual, and OverallQual) using domain knowledge via ordinal encoding:
+#### Re-encoding ordinal values
 
-%TODO: passer ce qui suit en code
+Categorical features were previously encoded as one-hot vectors. We reintroduced two of them (`ExterQual`, and `OverallQual`). Since `OverallQual` was already an ordinal variable we kept it as it was. Using domain knowledge via ordinal encoding we modified `ExterQual` as follows:
+
 ```python
 grades = {'Ex': 5, 'Gd': 4, 'TA': 3, 'Fa': 2, 'Po': 1}
 ```
-This allowed us to retain their natural order while simplifying the model and interpretation. Given that we want to maintain the order inside of the variable (10>9>8>...) we converted them to integers. These variables were added back into the final dataset alongside the top features selected by the random forest.
+This allowed us to retain their natural order while simplifying the model and interpretation. Given that we want to maintain the order inside of the variable (10>9>8>...) we converted them to integers. These variables were added back into the final dataset alongside the top features selected by the random forest regressor.
 
 ### Data Visualisation
-To better understand the distribution of each feature and its relationship with the target variable SalePrice, we performed the following visualizations:
 
-For each variable, we plotted a boxplot, grouped by category level for categorical features. That helps us to detect outliers, skewness, and distribution shape and highlight potential preprocessing needs.
-
-%PLOTS
+To better understand the distribution of each feature and its relationship with the target variable `SalePrice`, we performed the following visualizations.  
+For each variable, we plotted a boxplot. That helps us to detect outliers, skewness, and distribution shape and highlight potential preprocessing needs.
 
 <div align="center">
   <img src="figures/garagecars_boxplot.png" alt="Boxplot of the GarageCars variable" width="500"/>
@@ -112,19 +110,20 @@ For each variable, we plotted a boxplot, grouped by category level for categoric
   <p><em>Figure 12. Distribution of SalePrice</em></p>
 </div>
 
-### Data Cleaning
+### Data preprocessing 2.0
+
 In the visualisation of our data, we have seen some preoccupant outliers. Therefore, we implemented a systematic cleaning step to identify and handle outliers.
 
-We used the Interquartile Range (IQR) method to detect outliers for each numerical feature
+We used the `Interquartile Range (IQR)` method to detect outliers for each numerical feature :
 
-%TODO 
 - For each variable X, we compute the 25th percentile $Q_1$ and the 75th percentile $Q_3$.
 - The IQR is defined as IQR=$Q_3-Q_1$.
 - Observations are considered outliers if they fall outside the range: [Lower Bound, Upper Bound]= $[Q_1−1.5\times \text{IQR}, Q_3+1.5\times \text{IQR}]$
 
-This method was applied to all numeric and continuous variables from the selected top features, excluding the target variable SalePrice, which was handled separately.
+This method was applied to all variables from the selected top features and  `SalePrice` variable. At the same time, lines containing missing values have been deleted.
 
 The result is a cleaned dataset free of extreme values, which ensures that subsequent statistical analyses (regressions, ANOVA, etc.) are not unduly influenced by atypical points.
+
 ### Modeling
 - **Regression Models:**
   - Linear regression with selected variables.
@@ -136,10 +135,10 @@ The result is a cleaned dataset free of extreme values, which ensures that subse
   - Metrics: RMSE, MAE, R².
   - Residual diagnostics (normality Q-Q plots, homoscedasticity).
   - Cross-validation if applicable.
-- **First Model:**
-We made our first model basing on the top feature retained after preprocessing and outlier removal. To do that we used the OLS regressor of the statsmodels module.
 
-%TODO: mettre tableau
+#### First Model
+
+We made our first model basing on the top feature retained after preprocessing and outlier removal. To do that we used the `OLS regressor` of the statsmodels module.
 
 <div align="center">
 
@@ -170,12 +169,12 @@ LotArea          2.2925      0.214     10.700      0.000       1.872       2.713
 FullBath     -4785.2188   1695.287     -2.823      0.005   -8111.107   -1459.331
 ExterQual     1.314e+04   1733.225      7.583      0.000    9741.985    1.65e+04
 OverallQual   1.393e+04    804.222     17.322      0.000    1.24e+04    1.55e+04
-==============================================================================
+================================================================================
 Omnibus:                       65.817   Durbin-Watson:                   2.060
 Prob(Omnibus):                  0.000   Jarque-Bera (JB):              194.556
 Skew:                          -0.192   Prob(JB):                     5.66e-43
 Kurtosis:                       4.875   Cond. No.                     1.40e+06
-==============================================================================
+================================================================================
 
 Notes:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
@@ -184,13 +183,12 @@ strong multicollinearity or other numerical problems.
 </pre>
 </div>
 
-The high $R^2$ and significant p-value of the F-statistic suggests that the model already explains a substantial portion of the variability in house prices.
-Only the '2ndFlrSF' is not significant given the t-test results. The statistical test Jarque-Bera tells us that the residuals are not normally distributed. The Durbin-Watson test suggests no autocorrelation in residuals.
+The high $R^2$ and significant p-value of the `F-statistic` suggests that the model already explains a substantial portion of the variability in house prices.
+Only the `2ndFlrSF` is not significant given the t-test results. The statistical test `Jarque-Bera` tells us that the residuals are not normally distributed ($p-value < 0,05$). The `Durbin-Watson` test suggests no autocorrelation in residuals (Durbin-Watson > 2).
 
 #### Statistical Inference
-We have done some basic statistics on our variables like mean and variance. For each variable we have done an hypothesis test which is based on simple linear regression between it and SalePrice.
-All tested variables were found to be statistically significant at the 5% level. The confidence interval was measured for the coefficient of the linear regression.
-%TODO tableau
+
+We have done some basic statistics on our variables like mean and variance. For each variable we have done a simple linear regression between it and `SalePrice`. We made an hypothesis test based on the fact that the variable impacts `SalePrice` at $0,05$ significant level. The confidence interval was measured for the coefficient of the linear regression.
 
 <div style="max-width: 800px; margin: 0 auto;">
 <style scoped>
@@ -370,46 +368,47 @@ All tested variables were found to be statistically significant at the 5% level.
 </table>
 </div>
 
+All tested variables were found to be statistically significant at the 5% level. However, several variables exhibit large variances (greater than $10^5$) compared to relatively moderate means (mostly below $10^5$), which may indicate instability or heteroskedasticity in the data. 
+
 #### Factorial Design
-%TODO
-To investigate the influence of multiple binary factors on housing prices while minimizing the number of experiments, we applied a fractional factorial design of the form $2^{11-6} = 2^5 = 32$, derived from 11 binary variables (5 base factors and 6 aliasing generators). This design allows efficient estimation of main effects and low-order interactions.
 
-- Step 1: Binarization of Variables
+To investigate the influence of multiple binary factors on housing prices while minimizing the number of experiments, we applied a `fractional factorial design` of the form $2^{11-6} = 2^5 = 32$, derived from 11 binary variables (5 base factors and 6 aliasing generators). This design allows efficient estimation of main effects and low-order interactions.
 
+- Step 1: `Binarization` of Variables  
     We transformed continuous explanatory variables into binary form using their median values:
     Each variable $X$ is transformed into $X_{\text{bin}}\in\{-1,+1\}$, where: $X_{\text{bin}} = +1$ if $X\geq\text{ median}(X)$ and $-1$ otherwise.​
  
-This encoding was applied to all numeric variables except SalePrice.
+    This encoding was applied to all numeric variables except `SalePrice`.
 
-- Step 2: Selection of Factors
-    We selected 5 base factors:
-    - GarageCars_bin (A)
-    - GrLivArea_bin (B)
-    - TotalBsmtSF_bin (C)
-    - YearBuilt_bin (D)
-    - BsmtFinSF1_bin (E)
+- Step 2: Selection of Factors  
+    We selected 5 base factors (The most important factors of `RandomForestRegressor`):
+    - `GarageCars_bin`
+    - `GrLivArea_bin`
+    - `TotalBsmtSF_bin`
+    - `YearBuilt_bin`
+    - `BsmtFinSF1_bin`
 
-- Step 3: Generator and Aliasing
-    Using a fractional design, we defined 6 aliasing generators to derive 6 additional variables (F to K):
+- Step 3: Generator and Aliasing  
+    Using a fractional design, we defined 6 aliasing generators to derive 6 additional variables (F to K):  
     Derived Factor	Generator
-    - $F$	$A \times B$ (GarageCars_bin $\times$ GrLivArea_bin)
-    - $G$	$A \times C$ (GarageCars_bin $\times$ TotalBsmtSF_bin)
-    - $H$	$B \times D$ (GrLivArea_bin $\times$ YearBuilt_bin)
-    - $I$	$C \times E$ (TotalBsmtSF_bin $\times$ BsmtFinSF1_bin)
-    - $J$	$B \times E$ (GrLivArea_bin $\times$ BsmtFinSF1_bin)
-    - $K$	$A \times D$ (GarageCars_bin $\times$ YearBuilt_bin)
+    - $F$ = `GarageCars_bin` $\times$ `GrLivArea_bin`
+    - $G$	= `GarageCars_bin` $\times$ `TotalBsmtSF_bin`
+    - $H$	= `GrLivArea_bin` $\times$ `YearBuilt_bin`
+    - $I$	= `TotalBsmtSF_bin` $\times$ `BsmtFinSF1_bin`
+    - $J$	= `GrLivArea_bin` $\times$ `BsmtFinSF1_bin` 
+    - $K$	= `GarageCars_bin` $\times$ `YearBuilt_bin`
 
-These interactions help represent more complex effects using only 16 combinations.
+    These interactions help represent more complex effects using only 32 combinations.
 
-- Step 4: Experimental Plan and Response
-    A full factorial design $2^11$ was reduced to a $2^11-6$ fractional factorial design using the selected generators.
+- Step 4: Experimental Plan and Response  
+    A full factorial design $2^{11}$ was reduced to a $2^{11-6}$ fractional factorial design using the selected generators.
 
-    For each of the 32 combinations, we matched the corresponding rows in the dataset and computed the average SalePrice.
+    For each of the 32 combinations, we matched the corresponding rows in the dataset and computed the average `SalePrice`.
 
 ##### ANOVA
-To evaluate the statistical significance of each binary factor and their interactions on the housing price, we conducted an Analysis of Variance (ANOVA) on the fractional factorial design $2^{11-6}=32$ using the average SalePrice as the response variable.
 
-%TODO tableau
+To evaluate the statistical significance of each binary factor and their interactions on the housing price, we conducted an `Analysis of Variance (ANOVA)` on the `fractional factorial design` $2^{11-6}=32$ using the average `SalePrice` as the response variable.
+
 <div align='center'>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -572,17 +571,18 @@ To evaluate the statistical significance of each binary factor and their interac
 </table>
 </div>
 
-The main effects GarageCars_bin, GrLivArea_bin, TotalBsmtSF_bin, and YearBuilt_bin are statistically significant (p < 0.05).
+The main effects `GarageCars_bin`, `GrLivArea_bin`, `TotalBsmtSF_bin`, and `YearBuilt_bin` are statistically significant ($p < 0.05$).
 
-Among the interactions, only F (A $\times$ B) and K (A $\times$ D) are significant, suggesting relevant second-order interactions between these variables.
+Among the interactions, only `F` (`GarageCars_bin` $\times$ `GrLivArea_bin`) and `K` (`GarageCars_bin` $\times$ `YearBuilt_bin`) are significant, suggesting relevant second-order interactions between these variables.
 
-The residual sum of squares is relatively low, indicating good explanatory power of the model ($R^2$ = 0.90+)
+The residual sum of squares is relatively low, indicating good explanatory power of the model ($R^2 = SSR / SST = 90,1 \%$).
 
 ##### Reduced Regression Model
-Following the factorial ANOVA, we constructed a reduced linear regression model using only the variables and interaction terms that showed statistical significance (p-value < 0.05). This model aims to improve interpretability while retaining explanatory power.
-This gave us the following formula $SalePrice \sim GarageCars + GrLivArea + TotalBsmtSF + YearBuilt+ GarageCars \times GrLivArea + GarageCars \times YearBuilt$
 
-%TODO réaligner le tableau
+Following the `factorial ANOVA`, we constructed a reduced `linear regression model` using only the variables and interaction terms that showed statistical significance ($p-value < 0.05$). This model aims to improve interpretability while retaining explanatory power.
+This gave us the following formula 
+> $SalePrice \sim GarageCars + GrLivArea + TotalBsmtSF + YearBuilt+ GarageCars \times GrLivArea + GarageCars \times YearBuilt$
+
 <div align="center">
 <pre>
                                  OLS Regression Results                            
@@ -619,27 +619,28 @@ Notes:
 strong multicollinearity or other numerical problems.
 </pre>
 </div>
-The model is worse than the previous one and explains ~79% of the variability in house prices, confirming their strong predictive power.
+
+The model is not as good as the previous one, explaining only 79% of the variability in house prices, but it still confirms its predictive power. All the variables are signifiant at $5\%$ level. The `Jarque-Bera` statistical test indicates that the residuals are not normally distributed ($p-value < 0.05$). The `Durbin-Watson` test suggests the absence of autocorrelation in the residuals (Durbin-Watson > 2).
 
 #### $2^k$ factorial design
-%TODO traduire
-In view of the results of the model obtained with the fractional factorial design $2^{11-6}$, we decided to use a $2^k$
 
-To evaluate the joint influence of a broader set of binary explanatory variables on housing prices, we implemented a full factorial design with k=11 factors, theoretically leading to $2^11$=2048 possible treatment combinations.
+In view of the results of the model obtained with the `fractional factorial design $2^{11-6}$`, we decided to also do a `$2^k$ factorial design`.
+
+To evaluate the joint influence of a broader set of binary explanatory variables on housing prices, we implemented a `full factorial design` with k=11 factors, theoretically leading to $2^11$=2048 possible treatment combinations.
 
 We reused the binarisation done previously for the 11 factors used in this design.
 
-For each row of the factorial plan, we searched for matching observations in the real dataset. If a match was found, the mean SalePrice was computed and retained.
+For each row of the factorial plan, we searched for matching observations in the real dataset. If a match was found, the mean `SalePrice` was computed and retained.
 
-- **Results**
+- **Results**  
 Due to the sparsity of real data, only a subset of combinations was matched successfully.
 This design captures all main effects and all possible interactions among the 11 variables.
 It provides a complete framework for variance decomposition and effect estimation, although model complexity must be controlled to avoid overfitting.
 
 ##### ANOVA
-To fully exploit the interaction between 11 binarized features, we applied an ANOVA model on the full factorial design. This design theoretically includes $2^{11}$=2048 combinations, but only combinations observed in the dataset were used (259 observations).
 
-%TODO tableau
+To fully exploit the interaction between 11 binarized features, we applied an `ANOVA` model on the `full factorial design`. This design theoretically includes $2^{11}$=2048 combinations (only 1275 in our dataset), but only combinations observed in the dataset were used (259 observations).
+
 <div align='center'>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -801,14 +802,14 @@ To fully exploit the interaction between 11 binarized features, we applied an AN
   </tbody>
 </table>
 </div>
-The residual sum of squares is relatively low compared to the total (residual is approximatively 19%, total $R^2$ is around 81%), indicating a strong model fit.
 
-The only non-significant factor is FullBath_bin, suggesting minimal impact of bathroom count in this binary formulation.
+The residual sum of squares is relatively low compared to the total (residual is approximatively 19%, total $R^2$ is around 81%), indicating a strong model fit.  
+The only non-significant factor is `FullBath_bin`, suggesting minimal impact of bathroom count in this binary formulation.
 
 ##### Regression
-Using the variables identified as statistically significant in the full factorial $2^{11}$ ANOVA, we built a refined linear regression model to predict SalePrice following the formula $SalePrice\sim GarageCars+GrLivArea+TotalBsmtSF+YearBuilt+BsmtFinSF1+YearRemodAdd+SecondFlrSF+LotArea+ExterQual+OverallQual$
+Using the variables identified as statistically significant in the `full factorial $2^{11}$ ANOVA`, we built a refined `linear regression model` to predict `SalePrice` following the formula 
+> $SalePrice\sim GarageCars+GrLivArea+TotalBsmtSF+YearBuilt+BsmtFinSF1+YearRemodAdd+SecondFlrSF+LotArea+ExterQual+OverallQual$
 
-%TODO tableau
 <div align='center'>
 <pre>
                             OLS Regression Results                            
@@ -836,12 +837,12 @@ SecondFlrSF      7.4767      4.234      1.766      0.078      -0.829      15.783
 LotArea          2.3374      0.214     10.911      0.000       1.917       2.758
 ExterQual     1.302e+04   1737.445      7.493      0.000    9610.514    1.64e+04
 OverallQual   1.391e+04    806.394     17.247      0.000    1.23e+04    1.55e+04
-==============================================================================
+================================================================================
 Omnibus:                       67.265   Durbin-Watson:                   2.050
 Prob(Omnibus):                  0.000   Jarque-Bera (JB):              203.583
 Skew:                          -0.190   Prob(JB):                     6.20e-45
 Kurtosis:                       4.920   Cond. No.                     1.33e+06
-==============================================================================
+================================================================================
 
 Notes:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
@@ -849,9 +850,15 @@ Notes:
 strong multicollinearity or other numerical problems.
 </pre>
 </div>
-This model explains 86.5% of the variability in SalePrice, confirming the predictive power of the selected features.
+
+This model explains 86.5% of the variability in `SalePrice`, confirming the predictive power of the selected features. The model is better than the one obtained with the fractional factorial $2^{k-p}.  
+Only the variable `SecondFlrSF` is not significant at the 5% level.  
+The p-value of the `Jarque-Bera` statistic test being smaller than $0.05$, the residuals are not normally distributed. The `Durbin-Watson` test suggests the absence of autocorrelation in the residuals (Durbin-Watson > 2).
 
 ##### ANOVA
+
+To ensure that `SecondFlrSF` is insignificant, we decided to also run an `ANOVA` on the model.
+
 <div align='center'>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -883,107 +890,117 @@ This model explains 86.5% of the variability in SalePrice, confirming the predic
     <tr>
       <th>0</th>
       <td>GarageCars</td>
-      <td>1.296105e+10</td>
+      <td>1.329836e+10</td>
       <td>1.0</td>
-      <td>28.480353</td>
-      <td>1.120723e-07</td>
-      <td>1.296105e+10</td>
+      <td>29.270507</td>
+      <td>7.522321e-08</td>
+      <td>1.329836e+10</td>
       <td>Yes</td>
     </tr>
     <tr>
       <th>1</th>
       <td>GrLivArea</td>
-      <td>2.488920e+11</td>
+      <td>3.708235e+10</td>
       <td>1.0</td>
-      <td>546.910569</td>
-      <td>8.144936e-101</td>
-      <td>2.488920e+11</td>
+      <td>81.620510</td>
+      <td>6.017992e-19</td>
+      <td>3.708235e+10</td>
       <td>Yes</td>
     </tr>
     <tr>
       <th>2</th>
       <td>TotalBsmtSF</td>
-      <td>2.994405e+10</td>
+      <td>1.599687e+10</td>
       <td>1.0</td>
-      <td>65.798468</td>
-      <td>1.171204e-15</td>
-      <td>2.994405e+10</td>
+      <td>35.210092</td>
+      <td>3.816986e-09</td>
+      <td>1.599687e+10</td>
       <td>Yes</td>
     </tr>
     <tr>
       <th>3</th>
       <td>YearBuilt</td>
-      <td>1.646300e+10</td>
+      <td>1.379880e+10</td>
       <td>1.0</td>
-      <td>36.175470</td>
-      <td>2.356872e-09</td>
-      <td>1.646300e+10</td>
+      <td>30.371998</td>
+      <td>4.318242e-08</td>
+      <td>1.379880e+10</td>
       <td>Yes</td>
     </tr>
     <tr>
       <th>4</th>
       <td>BsmtFinSF1</td>
-      <td>7.550585e+10</td>
+      <td>7.633127e+10</td>
       <td>1.0</td>
-      <td>165.915110</td>
-      <td>9.174501e-36</td>
-      <td>7.550585e+10</td>
+      <td>168.009795</td>
+      <td>3.631020e-36</td>
+      <td>7.633127e+10</td>
       <td>Yes</td>
     </tr>
     <tr>
       <th>5</th>
       <td>YearRemodAdd</td>
-      <td>2.736020e+10</td>
+      <td>2.837246e+10</td>
       <td>1.0</td>
-      <td>60.120774</td>
-      <td>1.824595e-14</td>
-      <td>2.736020e+10</td>
+      <td>62.449521</td>
+      <td>5.908627e-15</td>
+      <td>2.837246e+10</td>
       <td>Yes</td>
     </tr>
     <tr>
       <th>6</th>
-      <td>LotArea</td>
-      <td>5.290173e+10</td>
+      <td>SecondFlrSF</td>
+      <td>1.416947e+09</td>
       <td>1.0</td>
-      <td>116.245246</td>
-      <td>5.439791e-26</td>
-      <td>5.290173e+10</td>
-      <td>Yes</td>
+      <td>3.118787</td>
+      <td>7.763575e-02</td>
+      <td>1.416947e+09</td>
+      <td>No</td>
     </tr>
     <tr>
       <th>7</th>
-      <td>ExterQual</td>
-      <td>2.658352e+10</td>
+      <td>LotArea</td>
+      <td>5.408405e+10</td>
       <td>1.0</td>
-      <td>58.414106</td>
-      <td>4.177893e-14</td>
-      <td>2.658352e+10</td>
+      <td>119.042309</td>
+      <td>1.500081e-26</td>
+      <td>5.408405e+10</td>
       <td>Yes</td>
     </tr>
     <tr>
       <th>8</th>
-      <td>OverallQual</td>
-      <td>1.362131e+11</td>
+      <td>ExterQual</td>
+      <td>2.550987e+10</td>
       <td>1.0</td>
-      <td>299.312040</td>
-      <td>2.350641e-60</td>
-      <td>1.362131e+11</td>
+      <td>56.148795</td>
+      <td>1.258067e-13</td>
+      <td>2.550987e+10</td>
       <td>Yes</td>
     </tr>
     <tr>
       <th>9</th>
-      <td>Residual</td>
-      <td>5.756854e+11</td>
-      <td>1265.0</td>
-      <td>NaN</td>
-      <td>NaN</td>
-      <td>4.550873e+08</td>
-      <td>No</td>
+      <td>OverallQual</td>
+      <td>1.351430e+11</td>
+      <td>1.0</td>
+      <td>297.457912</td>
+      <td>5.041960e-60</td>
+      <td>1.351430e+11</td>
+      <td>Yes</td>
     </tr>
     <tr>
       <th>10</th>
+      <td>Residual</td>
+      <td>5.742685e+11</td>
+      <td>1264.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>4.543263e+08</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <th>11</th>
       <td>Total</td>
-      <td>1.202510e+12</td>
+      <td>9.753024e+11</td>
       <td>1274.0</td>
       <td>NaN</td>
       <td>NaN</td>
@@ -993,10 +1010,59 @@ This model explains 86.5% of the variability in SalePrice, confirming the predic
   </tbody>
 </table>
 </div>
-To validate the statistical contribution of each predictor in the final OLS model, we computed an Analysis of Variance (ANOVA, Type II) on the reduced model including only variables identified as significant in the full factorial design.
 
-All predictors are statistically significant (p < 0.05), confirming the validity of their inclusion.
-This ANOVA confirms the robustness and relevance of the selected variables. The model captures a substantial portion of the variance in SalePrice, and the predictors show statistically and practically significant effects.
+The `ANOVA` confirms that most variables in the model contribute significantly to the explained variance, while `SecondFlrSF` does not—thus reinforcing the interpretation from the OLS output and supporting decisions about model simplification.
+
+##### Regression
+
+Removing the variable identified as not statistically significant in the previous `OLS` and `ANOVA` models, we built a refined `linear regression model` to predict `SalePrice` following the formula 
+> $SalePrice\sim GarageCars+GrLivArea+TotalBsmtSF+YearBuilt+BsmtFinSF1+YearRemodAdd+LotArea+ExterQual+OverallQual$
+
+<div align="center">
+  <pre>
+                            OLS Regression Results                            
+================================================================================
+Dep. Variable:              SalePrice   R-squared:                       0.865
+Model:                            OLS   Adj. R-squared:                  0.864
+Method:                 Least Squares   F-statistic:                     898.7
+Date:                Mon, 26 May 2025   Prob (F-statistic):               0.00
+Time:                        12:52:35   Log-Likelihood:                -14513.
+No. Observations:                1275   AIC:                         2.905e+04
+Df Residuals:                    1265   BIC:                         2.910e+04
+Df Model:                           9                                         
+Covariance Type:            nonrobust                                         
+================================================================================
+                   coef    std err          t      P>|t|      [0.025      0.975]
+--------------------------------------------------------------------------------
+Intercept    -1.059e+06    7.8e+04    -13.569      0.000   -1.21e+06   -9.06e+05
+GarageCars    6188.4157   1159.596      5.337      0.000    3913.472    8463.359
+GrLivArea       43.5371      1.862     23.386      0.000      39.885      47.189
+TotalBsmtSF     18.8266      2.321      8.112      0.000      14.273      23.380
+YearBuilt      187.3805     31.154      6.015      0.000     126.261     248.500
+BsmtFinSF1      21.2416      1.649     12.881      0.000      18.006      24.477
+YearRemodAdd   306.3850     39.514      7.754      0.000     228.864     383.906
+LotArea          2.3010      0.213     10.782      0.000       1.882       2.720
+ExterQual     1.325e+04   1733.886      7.643      0.000    9850.327    1.67e+04
+OverallQual   1.396e+04    806.624     17.301      0.000    1.24e+04    1.55e+04
+================================================================================
+Omnibus:                       66.832   Durbin-Watson:                   2.053
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              201.031
+Skew:                          -0.190   Prob(JB):                     2.22e-44
+Kurtosis:                       4.908   Cond. No.                     1.32e+06
+================================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+[2] The condition number is large, 1.32e+06. This might indicate that there are
+strong multicollinearity or other numerical problems.
+</pre>
+</div>
+
+This linear regression model explains 86.5% of the variability in house prices ($R^2 = 0.865$), with an adjusted $R^2$ of $0.864$ , indicating excellent model fit, like with the previous one. The global F-test is highly significant and better than previously($F = 898.7$, $p < 0.001$), confirming that the set of predictors collectively explains a significant proportion of variance in `SalePrice`.
+
+All predictors are statistically significant ($p < 0.05$), confirming the validity of their inclusion.
+
+The statistical test `Jarque-Bera` tells us that the residuals are not normally distributed ($p-value < 0,05$). The `Durbin-Watson` test suggests no autocorrelation in residuals (Durbin-Watson > 2).
 
 ##### Predicted values vs Actual values
 To evaluate how well the final regression model predicts housing prices, we applied it to the full cleaned dataset and compared the predicted values with the actual sale prices.
@@ -1015,10 +1081,13 @@ Slight deviations from the diagonal appear for extreme values, especially at the
 The linear regression model captures the core structure of the housing market and offers strong predictive ability, making it a solid component in our overall modeling pipeline—especially for explainability and feature importance.
 
 ### SARIMA
+
 #### Preprocess of the data
-To model the temporal dynamics of housing prices, we constructed a monthly time series from the training dataset for use with SARIMA modeling.
+
+To model the temporal dynamics of housing prices, we constructed a monthly time series from the training dataset for use with `SARIMA` modeling.
 
 #### First plot
+
 The figure below shows the monthly average house sale price over the period covered in the dataset (2006–2010)
 
 <div align="center">
@@ -1032,7 +1101,9 @@ The figure below shows the monthly average house sale price over the period cove
 - There is no clear tred pattern
 
 #### Seasonal decomposition
+
 To better understand the components driving the variation in monthly average house prices, we applied an additive seasonal decomposition with a 12-month periodicity.
+
 <div align="center">
   <img src="figures/seasonal_decomposition.png" alt="Seasonal decomposition of the time series plot of the sale price" width="500"/>
   <p><em>Figure 15. Seasonal decomposition of the time series plot of the sale price</em></p>
@@ -1041,25 +1112,25 @@ To better understand the components driving the variation in monthly average hou
 **Trend**
 
 - A downward trend is visible from mid-2007 to early 2009, possibly reflecting the 2008 housing crisis.
-- The overall trend appears non-stationary, which justifies differencing in SARIMA modeling.
+- The overall trend appears non-stationary, which justifies differencing in `SARIMA` modeling.
 
 **Seasonality**
 
 - A repeating seasonal pattern is evident, especially visible as peaks around mid-year and dips near the start of each year.
-- This supports the use of a seasonal component (S) in SARIMA.
+- This supports the use of a seasonal component (S) in `SARIMA`.
 
 **Residuals**
 
 - The residuals fluctuate around zero, suggesting that the decomposition has effectively extracted the trend and seasonal structure.
 
-This decomposition confirms that a SARIMA model is appropriate, as the series exhibits both trend and seasonality, and is likely non-stationary. This tells us that we should do a simple and a combined difference.
+This decomposition confirms that a `SARIMA` model is appropriate, as the series exhibits both trend and seasonality, and is likely non-stationary. This tells us that we should do a simple and a combined difference.
 
 #### First differentiation
 To assess the stationarity of the average house sale price series, we applied a first-order differencing transformation and evaluated whether a deterministic trend remained.
 
 **Differencing**
 Differencing
-We computed the first difference:
+We computed the `first difference`:
 %TODO
 𝑌
 𝑡
@@ -1083,6 +1154,7 @@ t
 t−1
 ​
 This transformation removes trend components and helps stabilize the mean of the series over time.
+
 <div align="center">
   <img src="figures/first_difference.png" alt="Plot of the first differenciation of the series" width="500"/>
   <p><em>Figure 16. Plot of the first differenciation of the series</em></p>
@@ -1091,13 +1163,13 @@ This transformation removes trend components and helps stabilize the mean of the
 The values oscillate around 0, indicating that the global trend has been removed, as expected from differencing.
 
 **Trend test via Linear Regression**
-We ran a linear regression on both the original and the differenced series against time to test for a significant trend and obtained the following p-values 0.025 (without differentiation) and 0.671 (with differentiation).
+We ran a `linear regression` on both the original and the differenced series against time to test for a significant trend and obtained the following p-values $0.025$ (without differentiation) and $0.671$ (with differentiation).
 
 The original time series has a statistically significant upward/downward trend, while the differenced series does not. This suggests that first differencing (d = 1) is sufficient to achieve trend stationarity.
 
 #### Combined Difference
 
-To remove both trend and seasonal effects from the average monthly house sale price series, we applied a combined differencing operator:
+To remove both trend and seasonal effects from the average monthly house sale price series, we applied a `combined differencing operator`:
 
 %TODO
 
@@ -1151,10 +1223,8 @@ t−13
 ​
 
 This transformation is necessary when a time series shows both:
-
-Non-stationarity in level (trend),
-
-Repeating seasonal fluctuations (yearly pattern with monthly data).
+- Non-stationarity in level (trend)
+- Repeating seasonal fluctuations (yearly pattern with monthly data).
 
 <div align="center">
   <img src="figures/combined_difference.png" alt="Combined difference plot of the time series of the sale price" width="500"/>
@@ -1171,20 +1241,20 @@ Based on this transformation, we set:
 
 #### ACF/PACF
 
-To identify suitable orders for the ARIMA model, we examined the autocorrelation function (ACF) and partial autocorrelation function (PACF) of the series after combined first and seasonal differencing.
+To identify suitable orders for the `ARIMA` model, we examined the `autocorrelation function (ACF)` and `partial autocorrelation function (PACF)` of the series after combined first and seasonal differencing.
 
 <div align="center">
   <img src="figures/combined_acf_pacf.png" alt="ACF/PACF of the combined differenced series" width="500"/>
   <p><em>Figure 18. ACF/PACF of the combined differenced series</em></p>
 </div>
 
-From the ACF and PACF we can't see any AR/MA structure. So we will start with an ARIMA model (0,1,0) and test the following ARIMA orders:
-- ARIMA(1,1,0)
-- ARIMA(0,1,1)
-- ARIMA(1,1,1)
+From the `ACF` and `PACF` we can't see any `AR/MA structure`. So we will start with an `ARIMA model (0,1,0)` and test the following `ARIMA` orders:
+- `ARIMA(1,1,0)`
+- `ARIMA(0,1,1)`
+- `ARIMA(1,1,1)`
 
 #### Comparison of the different ARIMA models
-To identify the best-fitting non-seasonal ARIMA model, we tested multiple order combinations of the form ARIMA(p, 1, q), where d = 1 corresponds to the first difference applied to achieve stationarity.
+To identify the best-fitting non-seasonal `ARIMA` model, we tested multiple order combinations of the form `ARIMA(p, 1, q)`, where d = 1 corresponds to the first difference applied to achieve stationarity.
 
 <div align='center'>
 <style scoped>
@@ -1238,24 +1308,26 @@ To identify the best-fitting non-seasonal ARIMA model, we tested multiple order 
 </table>
 </div>
 
-Among the tested ARIMA configurations, the ARIMA(0, 1, 1) model is the most parsimonious and best-performing in terms of AIC and BIC.
+Among the tested `ARIMA` configurations, the `ARIMA(0, 1, 1)` model is the most parsimonious and best-performing in terms of `AIC` and `BIC`.
 
 ##### Residuals
-To validate the adequacy of the best non-seasonal model (ARIMA(0,1,1)), we analyzed its residuals.
+To validate the adequacy of the best non-seasonal model (`ARIMA(0,1,1)`), we analyzed its residuals.
+
 <div align="center">
   <img src="figures/arima_residuals.png" alt="Residuals plot of the ARIMA(0,1,1) model" width="500"/>
   <p><em>Figure 19. Residuals plot of the ARIMA(0,1,1) model</em></p>
 </div>
+
 The residuals oscillate around zero with no obvious trend or seasonal pattern, which is a good indication of model adequacy.
 
-The ACF plot shows no significant autocorrelation beyond lag 0, all ACF spikes fall within the 95% confidence band.
+The `ACF` plot shows no significant autocorrelation beyond lag 0, all ACF spikes fall within the 95% confidence band.
 
-The PACF also shows no significant lags.
+The `PACF` also shows no significant lags.
 
-In conclusion, the ARIMA(0,1,1) model is well specified. The residuals show no significant autocorrelation or structure, confirming that this model captures the underlying dynamics of the differenced series.
+In conclusion, the `ARIMA(0,1,1)` model is well specified. The residuals show no significant autocorrelation or structure, confirming that this model captures the underlying dynamics of the differenced series.
 
 #### SARIMA configuration
-To incorporate potential seasonal dynamics, we estimated multiple SARIMA models combining the previously optimal non-seasonal structure ARIMA(0,1,1) with various seasonal components.
+To incorporate potential seasonal dynamics, we estimated multiple `SARIMA` models combining the previously optimal non-seasonal structure `ARIMA(0,1,1)` with various seasonal components.
 
 <div align='center'>
 <style scoped>
@@ -1314,24 +1386,26 @@ To incorporate potential seasonal dynamics, we estimated multiple SARIMA models 
 </table>
 </div>
 
-The best-performing model is SARIMA(0,1,1)(1,1,0,12), with the lowest AIC = 703.29 and BIC = 707.49.
+The best-performing model is `SARIMA(0,1,1)(1,1,0,12)`, with the lowest `AIC = 703.29` and `BIC = 707.49`.
 
 ##### Residuals
-After identifying SARIMA(0,1,1)(1,1,0)[12] as the best model, we examined the residuals to assess model adequacy.
+After identifying `SARIMA(0,1,1)(1,1,0,12)` as the best model, we examined the residuals to assess model adequacy.
+
 <div align="center">
   <img src="figures/sarima_residuals.png" alt="Residuals plot of the SARIMA(0,1,1)(1,1,0,12) model" width="500"/>
   <p><em>Figure 20. Residuals plot of the SARIMA(0,1,1)(1,1,0,12) model</em></p>
 </div>
+
 Residuals fluctuate around zero without obvious trend or seasonal pattern, indicating that the model captures the overall dynamics of the data.
 
-ACF spikes fall within the 95% confidence bands. This suggests no remaining autocorrelation, confirming that the model has sufficiently captured temporal dependencies.
+`ACF` spikes fall within the 95% confidence bands. This suggests no remaining autocorrelation, confirming that the model has sufficiently captured temporal dependencies.
 
-Like the ACF, the partial autocorrelations are all insignificant beyond lag 0.
+Like the `ACF`, the partial autocorrelations are all insignificant beyond lag 0.
 
-The residual diagnostics confirm that SARIMA(0,1,1)(1,1,0)[12] is a well-specified model. The residuals are uncorrelated and centered, validating both the seasonal and non-seasonal components.
+The residual diagnostics confirm that `SARIMA(0,1,1)(1,1,0,12)` is a well-specified model. The residuals are uncorrelated and centered, validating both the seasonal and non-seasonal components.
 
 #### SARIMA model (0,1,1)(1,1,0,12)
-The selected model is SARIMA(0,1,1)(1,1,0,12), which combines a non-seasonal moving average component with a seasonal autoregressive term. Below is a summary of the estimation results:
+The selected model is` SARIMA(0,1,1)(1,1,0,12)`, which combines a non-seasonal moving average component with a seasonal autoregressive term. Below is a summary of the estimation results.
 <div>
 <pre>
                                           SARIMAX Results                                      
@@ -1361,41 +1435,44 @@ Warnings:
 [2] Covariance matrix is singular or near-singular, with condition number    inf. Standard errors may be unstable.
 </pre>
 </div>
-The seasonal AR term at lag 12 is statistically significant and negative, indicating a strong inverse seasonal relationship (e.g., price tends to revert after 12 months).
 
-The non-seasonal MA(1) term is not significant, but including it improves the model’s overall AIC/BIC.
+The seasonal `AR` term at lag 12 is statistically significant and negative, indicating a strong inverse seasonal relationship (e.g., price tends to revert after 12 months).
+
+The non-seasonal `MA(1)` term is not significant, but including it improves the model’s overall `AIC/BIC`.
 
 The residual variance is quite high but expected given the scale of sale prices.
 
-The model is statistically well-specified, with no residual autocorrelation (p-value of Ljung-Box $>0.05$), homoskedastic errors (p-value of Heteroskedasticity $>0.05$), and a normal distribution of residuals (p-value of Jarque-Bera $>0.05$).
+The model is statistically well-specified, with no residual autocorrelation (p-value of `Ljung-Box` $>0.05$), homoskedastic errors (p-value of `Heteroskedasticity` $>0.05$), and a normal distribution of residuals (p-value of `Jarque-Bera` $>0.05$).
 
 #### SARIMA model prediction
-To evaluate the model's generalization ability, we split the time series into 80% training data and 20% testing data, and applied rolling forecast using the SARIMA(0,1,1)(1,1,0,12) model.
+To evaluate the model's generalization ability, we split the time series into 80% training data and 20% testing data, and applied `rolling forecast` using the` SARIMA(0,1,1)(1,1,0,12)` model.
 
 <div align="center">
   <img src="figures/forecast_sarima.png" alt="Forecast vs Actuals SARIMA(0,1,1)(1,1,0,12)" width="500"/>
   <p><em>Figure 21. Forecast vs Actuals SARIMA(0,1,1)(1,1,0,12)</em></p>
 </div>
+
 The model does not perform well. We can see a sort of resemblance between the 2 lines, if we shift the orange line back one month, the two curves would follow the same general direction.
 
 ## Conclusion
 In this project, we conducted a comprehensive statistical analysis to understand and predict house sale prices based on the Ames Housing dataset. Our approach was structured into several key phases:
 
-Data Preprocessing and Feature Selection
-We encoded categorical variables, removed multicollinearity through correlation filtering, and identified the most relevant predictors using a Random Forest-based importance ranking. The resulting dataset was cleaned of outliers using the IQR method.
+- Data Preprocessing and Feature Selection  
+  We encoded categorical variables, removed multicollinearity through correlation filtering, and identified the most relevant predictors using a `Random Forest-based` importance ranking. The resulting dataset was cleaned of outliers using the `IQR` method.
 
-Statistical Inference and Modeling
-Through classical inference, we confirmed the significant influence of variables such as OverallQual, GrLivArea, and ExterQual on sale prices. We built and refined multiple OLS regression models, supported by ANOVA and factorial design methods to capture key interactions and effects.
+- Statistical Inference and Modeling  
+Through classical inference, we confirmed the significant influence of variables such as `OverallQual`, `GrLivArea`, and `ExterQual` on sale prices. We built and refined multiple `OLS regression` models, supported by `ANOVA` and some `factorial design` methods to capture key interactions and effects. We done predictions to compare real values to predicted ones.
 
-Time Series Analysis
-A monthly average price time series was constructed, showing both trend and seasonality. After verifying stationarity through decomposition and differencing, we fitted several ARIMA and SARIMA models. The best-performing model was identified as SARIMA(0,1,1)(1,1,0)[12], based on AIC/BIC and residual diagnostics.
 
-Forecasting and Evaluation
-Using rolling one-step-ahead predictions on a test set, we compared actual and predicted sale prices. The SARIMA model accurately captured the overall dynamics and timing of price fluctuations, though it showed limitations during sudden shifts.
+- Time Series Analysis  
+A monthly average price time series was constructed, showing both trend and seasonality. After verifying stationarity through decomposition and differencing, we fitted several `ARIMA` and `SARIMA` models. The best-performing model was identified as `SARIMA(0,1,1)(1,1,0,12)`, based on `AIC/BIC` and residual diagnostics.
+
+- Forecasting and Evaluation
+Using rolling one-step-ahead predictions on a test set, we compared actual and predicted sale prices. The `SARIMA` model accurately captured the general dynamics and timing of price fluctuations, though it showed limitations.
 
 ---
 
 ## Repository
 All code and data are available on the following Git repository:  
-**[GitHub Repository URL]**
+**[GitHub Repository URL]** https://github.com/decimoplays/CStat-Project
 
