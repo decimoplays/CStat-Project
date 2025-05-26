@@ -22,27 +22,28 @@ The objective of this project is to predict house prices and understand the infl
 
 ### Data Preprocessing 1.0
 
-#### Categorical Variable Encoding
+#### Categorical Variable Encoding\
+
 We identified 45 categorical variables and converted them explicitly to the category type. These include both ordinal (e.g., `ExterQual`, `OverallQual`) and nominal (e.g., `RoofStyle`) features.
 
-#### One-Hot Encoding
+#### One-Hot Encoding\
 
 We applied `one-hot encoding` using `pd.get_dummies()` with `drop_first=True` to avoid multicollinearity due to the dummy variable trap. This transformation expanded the dataset to include binary indicator columns for each category level.
 
 ### Features Selection
 
-#### Correlation Filtering
+#### Correlation Filtering\
 
 We computed the `Pearson correlation matrix` of all numeric and one-hot-encoded variables. To reduce redundancy, we dropped all features that had a pairwise correlation above 0.75 (excluding the diagonal), which helps to reduce multicollinearity and model overfitting.
 
-#### Random Forest
+#### Random Forest\
 
 We trained a `RandomForestRegressor` on the encoded dataset to estimate the importance of each feature in predicting `SalePrice`.
 We extracted the top 20 most important features, visualized via a barplot, and retained all features with importance > 0.01.
 
 ![Barplot of the importance of features](./figures/importance_barplot.png)
 
-#### Re-encoding Ordinal Values
+#### Re-encoding Ordinal Values\
 
 Categorical features were previously encoded as one-hot vectors. We reintroduced two of them (`ExterQual`, and `OverallQual`) without the one-hot encode. Since `OverallQual` was already an ordinal numerical variable we kept it as it was. Using domain knowledge via ordinal encoding we modified `ExterQual` as follows:
 
@@ -209,7 +210,7 @@ To investigate the influence of multiple binary factors on housing prices while 
 
     For each of the 32 combinations, we matched the corresponding rows in the dataset and computed the average `SalePrice`.
 
-#### ANOVA
+#### ANOVA\
 
 To evaluate the statistical significance of each binary factor and their interactions on the housing price, we conducted an `Analysis of Variance (ANOVA)` on the `fractional factorial design` $2^{11-6}=32$ using the average `SalePrice` as the response variable.
 
@@ -246,7 +247,7 @@ Among the interactions, only `F` (`GarageCars_bin` $\times$ `GrLivArea_bin`) and
 
 The residual sum of squares is relatively low, indicating good explanatory power of the model ($R^2 = SSR / SST = 90,1 \%$).
 
-#### Reduced Regression Model
+#### Reduced Regression Model\
 
 Following the `factorial ANOVA`, we constructed a reduced `linear regression model` using only the variables and interaction terms that showed statistical significance ($\text{p-value} < 0.05$). This model aims to improve interpretability while retaining explanatory power.
 This gave us the following formula: 
@@ -304,7 +305,7 @@ Due to the sparsity of real data, only a subset of combinations was matched succ
 This design captures all main effects and all possible interactions among the 11 variables.
 It provides a complete framework for variance decomposition and effect estimation, although model complexity must be controlled to avoid overfitting.
 
-#### ANOVA
+#### ANOVA\
 
 To fully exploit the interaction between 11 binarized features, we applied an `ANOVA` model on the `full factorial design`. This design theoretically includes $2^{11}$=2048 combinations (in our case only 1275 would be possible given the size of our dataset), but only 259 combinations were used since it was the only ones that had at least one corresponding line in the dataset.
 
@@ -338,7 +339,7 @@ To fully exploit the interaction between 11 binarized features, we applied an `A
 The residual sum of squares is relatively low compared to the total (residual is approximatively 19%, total $R^2$ is around 81%), indicating a strong model fit.  
 The only non-significant factor is `FullBath_bin`, suggesting minimal impact of bathroom count in this binary formulation.
 
-#### Reduced Regression Model
+#### Reduced Regression Model\
 Using the variables identified as statistically significant in the full factorial $2^{11}$ `ANOVA`, we built a refined `linear regression model` to predict `SalePrice` following the formula: 
 > $SalePrice\sim GarageCars+GrLivArea+TotalBsmtSF+YearBuilt+BsmtFinSF1+YearRemodAdd+SecondFlrSF+LotArea+ExterQual+OverallQual$
 
@@ -385,7 +386,7 @@ This model explains $86.5\%$ of the variability in `SalePrice`, confirming the p
 Only the variable `SecondFlrSF` is not significant at the $5\%$ level.  
 The p-value of the `Jarque-Bera` statistic test being smaller than $0.05$, the residuals are not normally distributed. The `Durbin-Watson` test suggests the absence of autocorrelation in the residuals ($Durbin-Watson \approx 2$).
 
-#### ANOVA
+#### ANOVA\
 
 To ensure that `SecondFlrSF` is insignificant, we decided to also run an `ANOVA` on the model.
 
@@ -418,7 +419,7 @@ To ensure that `SecondFlrSF` is insignificant, we decided to also run an `ANOVA`
 
 The `ANOVA` confirms that most variables in the model contribute significantly to the explained variance, while `SecondFlrSF` does not. Thus reinforcing the interpretation from the `OLS` output and supporting decisions about model simplification.
 
-#### Final Regression Model
+#### Final Regression Model\
 
 Removing the variable identified as not statistically significant in the previous `OLS` and `ANOVA` models, we built a refined `linear regression model` to predict `SalePrice` following the formula: 
 > $SalePrice\sim GarageCars+GrLivArea+TotalBsmtSF+YearBuilt+BsmtFinSF1+YearRemodAdd+LotArea+ExterQual+OverallQual$
@@ -465,7 +466,7 @@ This linear regression model explains $86.5\%$ of the variability in house price
 All predictors are statistically significant ($\text{p-value} < 0.05$), confirming the validity of their inclusion.  
 The statistical test `Jarque-Bera` tells us that the residuals are not normally distributed ($\text{p-value} < 0.05$). The `Durbin-Watson` test suggests no autocorrelation in residuals ($\text{Durbin-Watson} \approx 2$).
 
-#### Predicted Values vs Actual Values
+#### Predicted Values vs Actual Values\
 To evaluate how well the final regression model predicts housing prices, we applied it to the full cleaned dataset and compared the predicted values with the actual sale prices.
 
 ![Comparison between predicted and real values](./figures/comparison_real_predicted.png){ width=0.3\textwidth }
@@ -480,46 +481,46 @@ The linear regression model captures the core structure of the housing market an
 
 ### SARIMA
 
-#### Data Preprocessing
+#### Data Preprocessing\
 
 To model the temporal dynamics of housing prices, we constructed a monthly time series from the training dataset for use with `SARIMA` modeling. Then we dropped all the missing values.
 
-#### Time Series
+#### Time Series\
 
 The figure below shows the monthly average house sale price over the period covered in the dataset (2006–2010)
 
 ![Temporal series plot of the sale price](./figures/temporal_series_plot.png){ width=0.3\textwidth }
 
 
-**Observations:**
+*Observations:*
 - The series exhibits strong variability, with spikes in prices around 2006, 2007, 2008 and 2010.
 - There is no clear seasonality pattern at first glance, but some periodic fluctuations could indicate latent seasonality.
 - There is no clear trend pattern.
 
-#### Seasonal Decomposition
+#### Seasonal Decomposition\
 
 To better understand the components driving the variation in monthly average house prices, we applied an additive seasonal decomposition with a 12-month periodicity.
 
 ![Seasonal decomposition of the time series plot of the sale price](./figures/seasonal_decomposition.png){ width=0.3\textwidth }
 
 
-**Trend**
+*Trend*
 
 - A downward trend is visible from mid-2007 to early 2009, possibly reflecting the 2008 housing crisis.
 - The overall trend appears non-stationary, which justifies differencing in `SARIMA` modeling.
 
-**Seasonality**
+*Seasonality*
 
 - A repeating seasonal pattern is evident, especially visible as peaks around mid-year and dips near the start of each year.
 - This supports the use of a seasonal component (S) in `SARIMA`.
 
-**Residuals**
+*Residuals*
 
 - The residuals fluctuate around zero, suggesting that the decomposition has effectively extracted the trend and seasonal structure.
 
 This decomposition confirms that a `SARIMA` model is appropriate, as the series exhibits both trend and seasonality, and is likely non-stationary. This tells us that we should do at least a simple and a combined difference.
 
-#### First Differentiation
+#### First Differentiation\
 To assess the stationarity of the average house sale price series, we applied a first-order differencing transformation and evaluated whether a deterministic trend remained.
 
 *Differencing*  
@@ -536,7 +537,7 @@ The values oscillate around 0, indicating that the global trend has been removed
 *Trend test via Linear Regression*  
 We ran a `linear regression` on both the original and the differenced series against time to test for a significant trend and obtained the following p-values $0.025$ (without differentiation) and $0.671$ (with differentiation). The original time series has a statistically significant upward/downward trend, while the differenced series does not. This suggests that first differencing (d = 1) is sufficient to achieve trend stationarity.
 
-#### Combined Difference
+#### Combined Difference\
 
 To remove both trend and seasonal effects from the average monthly house sale price series, we applied a `combined differencing operator`:
 > $(1-B)(1-B^{12})Y_t = Y_t-Y_{t-1} - Y_{t-12} + Y_{t-13}$​
@@ -556,7 +557,7 @@ Based on this transformation, we set:
 - D = 1 (seasonal difference)
 - s = 12 (monthly seasonality)
 
-#### ACF/PACF
+#### ACF/PACF\
 
 To identify suitable orders for the `ARIMA` model, we examined the `autocorrelation function (ACF)` and `partial autocorrelation function (PACF)` of the series after combined first and seasonal differencing.
 
@@ -567,7 +568,7 @@ From the `ACF` and `PACF` we can't see any `AR/MA structure`. So we will start w
 - `ARIMA(0,1,1)`
 - `ARIMA(1,1,1)`
 
-#### Comparison of the Different ARIMA Models
+#### Comparison of the Different ARIMA Models\
 To identify the best-fitting non-seasonal `ARIMA` model, we tested multiple order combinations of the form `ARIMA(p, 1, q)`, where d = 1 corresponds to the first difference applied to achieve stationarity.
 
 \begin{table}[ht]
@@ -588,7 +589,7 @@ To identify the best-fitting non-seasonal `ARIMA` model, we tested multiple orde
 
 Among the tested `ARIMA` configurations, the `ARIMA(0, 1, 1)` model is the most parsimonious and best-performing in terms of `AIC` and `BIC`.
 
-##### Residuals 
+##### Residuals\
 To validate the adequacy of the best non-seasonal model (`ARIMA(0,1,1)`), we analyzed its residuals.
 
 ![Residuals plot of the ARIMA(0,1,1) model](./figures/arima_residuals.png){ width=0.3\textwidth }
@@ -601,7 +602,7 @@ The `PACF` also shows no significant lags.
 
 In conclusion, the `ARIMA(0,1,1)` model is well specified. The residuals show no significant autocorrelation or structure, confirming that this model captures the underlying dynamics of the differenced series.
 
-#### SARIMA Configuration
+#### SARIMA Configuration\
 To incorporate potential seasonal dynamics, we estimated multiple `SARIMA` models combining the previously optimal non-seasonal structure `ARIMA(0,1,1)` with various seasonal components.
 
 \begin{table}[ht]
@@ -622,7 +623,7 @@ To incorporate potential seasonal dynamics, we estimated multiple `SARIMA` model
 
 The best-performing model is `SARIMA(0,1,1)(1,1,0,12)`, with the lowest `AIC = 703.29` and `BIC = 707.49`.
 
-##### Residuals
+##### Residuals\
 After identifying `SARIMA(0,1,1)(1,1,0,12)` as the best model, we examined the residuals to assess model adequacy.
 
 ![Residuals plot of the SARIMA(0,1,1)(1,1,0,12) model](./figures/sarima_residuals.png){ width=0.3\textwidth }
@@ -635,7 +636,7 @@ Like the `ACF`, the partial autocorrelations are all insignificant beyond lag 0.
 
 The residual diagnostics confirm that `SARIMA(0,1,1)(1,1,0,12)` is a well-specified model. The residuals are uncorrelated and centered, validating both the seasonal and non-seasonal components.
 
-#### SARIMA Model (0,1,1)(1,1,0,12)
+#### SARIMA Model (0,1,1)(1,1,0,12)\
 The selected model is `SARIMA(0,1,1)(1,1,0,12)`, which combines a non-seasonal moving average component with a seasonal autoregressive term. Below is a summary of the estimation results.
 
 ```plaintext
@@ -674,7 +675,7 @@ The residual variance is quite high but expected given the scale of sale prices.
 
 The model is statistically well-specified, with no residual autocorrelation (p-value of `Ljung-Box` $>0.05$), homoskedastic errors (p-value of `Heteroskedasticity` $>0.05$), and a normal distribution of residuals (p-value of `Jarque-Bera` $>0.05$).
 
-#### SARIMA Model Prediction
+#### SARIMA Model Prediction\
 To evaluate the model's generalization ability, we split the time series into 80% training data and 20% testing data, and applied `rolling forecast` using the `SARIMA(0,1,1)(1,1,0,12)` model.
 
 ![Forecast vs Actuals SARIMA(0,1,1)(1,1,0,12)](./figures/forecast_sarima.png){ width=500px }
