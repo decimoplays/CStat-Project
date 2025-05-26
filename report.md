@@ -585,17 +585,17 @@ This gave us the following formula $SalePrice \sim GarageCars + GrLivArea + Tota
 %TODO réaligner le tableau
 <div align="center">
 <pre>
-                            OLS Regression Results                            
-==============================================================================
-Dep. Variable:              SalePrice   R-squared:                       0.788
-Model:                            OLS   Adj. R-squared:                  0.787
-Method:                 Least Squares   F-statistic:                     783.3
-Date:                Sun, 25 May 2025   Prob (F-statistic):               0.00
-Time:                        18:39:32   Log-Likelihood:                -14801.
-No. Observations:                1275   AIC:                         2.962e+04
-Df Residuals:                    1268   BIC:                         2.965e+04
-Df Model:                           6                                         
-Covariance Type:            nonrobust                                         
+                                 OLS Regression Results                            
+========================================================================================
+     Dep. Variable:              SalePrice   R-squared:                       0.788
+     Model:                            OLS   Adj. R-squared:                  0.787
+     Method:                 Least Squares   F-statistic:                     783.3
+     Date:                Sun, 25 May 2025   Prob (F-statistic):               0.00
+     Time:                        18:39:32   Log-Likelihood:                -14801.
+     No. Observations:                1275   AIC:                         2.962e+04
+     Df Residuals:                    1268   BIC:                         2.965e+04
+     Df Model:                           6                                         
+     Covariance Type:            nonrobust                                         
 ========================================================================================
                            coef    std err          t      P>|t|      [0.025      0.975]
 ----------------------------------------------------------------------------------------
@@ -606,12 +606,12 @@ TotalBsmtSF             38.5424      2.653     14.530      0.000      33.338    
 YearBuilt              163.9603     71.102      2.306      0.021      24.470     303.450
 GarageCars:GrLivArea    13.2259      2.436      5.430      0.000       8.447      18.005
 GarageCars:YearBuilt   258.7121     38.100      6.790      0.000     183.967     333.458
-==============================================================================
-Omnibus:                       85.833   Durbin-Watson:                   2.070
-Prob(Omnibus):                  0.000   Jarque-Bera (JB):              381.353
-Skew:                           0.065   Prob(JB):                     1.55e-83
-Kurtosis:                       5.676   Cond. No.                     1.10e+06
-==============================================================================
+========================================================================================
+     Omnibus:                       85.833   Durbin-Watson:                   2.070
+     Prob(Omnibus):                  0.000   Jarque-Bera (JB):              381.353
+     Skew:                           0.065   Prob(JB):                     1.55e-83
+     Kurtosis:                       5.676   Cond. No.                     1.10e+06
+========================================================================================
 
 Notes:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
@@ -998,6 +998,22 @@ To validate the statistical contribution of each predictor in the final OLS mode
 All predictors are statistically significant (p < 0.05), confirming the validity of their inclusion.
 This ANOVA confirms the robustness and relevance of the selected variables. The model captures a substantial portion of the variance in SalePrice, and the predictors show statistically and practically significant effects.
 
+##### Predicted values vs Actual values
+To evaluate how well the final regression model predicts housing prices, we applied it to the full cleaned dataset and compared the predicted values with the actual sale prices.
+
+<div align='center'>
+  <img src="figures/comparison_real_predicted.png", alt="Comparison between predicted and real values" width="500"/>
+  <p><em>Figure 13. Comparison between predicted and real values</em></p>
+</div>
+
+The scatterplot shows a clear alignment of predicted values along the diagonal red dashed line, representing perfect prediction.
+
+Most points are tightly clustered around the line, indicating that the model performs well across a broad range of prices.
+
+Slight deviations from the diagonal appear for extreme values, especially at the lower and upper ends of the price distribution, which may suggest mild under- or over-prediction.
+
+The linear regression model captures the core structure of the housing market and offers strong predictive ability, making it a solid component in our overall modeling pipeline—especially for explainability and feature importance.
+
 ### SARIMA
 #### Preprocess of the data
 To model the temporal dynamics of housing prices, we constructed a monthly time series from the training dataset for use with SARIMA modeling.
@@ -1007,7 +1023,7 @@ The figure below shows the monthly average house sale price over the period cove
 
 <div align="center">
   <img src="figures/temporal_series_plot.png" alt="Temporal series plot of the sale price" width="500"/>
-  <p><em>Figure 13. Temporal series plot of the sale price</em></p>
+  <p><em>Figure 14. Temporal series plot of the sale price</em></p>
 </div>
 
 **Observations:**
@@ -1019,7 +1035,7 @@ The figure below shows the monthly average house sale price over the period cove
 To better understand the components driving the variation in monthly average house prices, we applied an additive seasonal decomposition with a 12-month periodicity.
 <div align="center">
   <img src="figures/seasonal_decomposition.png" alt="Seasonal decomposition of the time series plot of the sale price" width="500"/>
-  <p><em>Figure 14. Seasonal decomposition of the time series plot of the sale price</em></p>
+  <p><em>Figure 15. Seasonal decomposition of the time series plot of the sale price</em></p>
 </div>
 
 **Trend**
@@ -1069,7 +1085,7 @@ t−1
 This transformation removes trend components and helps stabilize the mean of the series over time.
 <div align="center">
   <img src="figures/first_difference.png" alt="Plot of the first differenciation of the series" width="500"/>
-  <p><em>Figure 15. Plot of the first differenciation of the series</em></p>
+  <p><em>Figure 16. Plot of the first differenciation of the series</em></p>
 </div>
 
 The values oscillate around 0, indicating that the global trend has been removed, as expected from differencing.
@@ -1142,7 +1158,7 @@ Repeating seasonal fluctuations (yearly pattern with monthly data).
 
 <div align="center">
   <img src="figures/combined_difference.png" alt="Combined difference plot of the time series of the sale price" width="500"/>
-  <p><em>Figure 16. Combined difference plot of the time series of the sale price</em></p>
+  <p><em>Figure 17. Combined difference plot of the time series of the sale price</em></p>
 </div>
 
 The series now oscillates around zero with no visible trend and no apparent seasonality, indicating that the series is fully stationarized.
@@ -1159,7 +1175,7 @@ To identify suitable orders for the ARIMA model, we examined the autocorrelation
 
 <div align="center">
   <img src="figures/combined_acf_pacf.png" alt="ACF/PACF of the combined differenced series" width="500"/>
-  <p><em>Figure 17. ACF/PACF of the combined differenced series</em></p>
+  <p><em>Figure 18. ACF/PACF of the combined differenced series</em></p>
 </div>
 
 From the ACF and PACF we can't see any AR/MA structure. So we will start with an ARIMA model (0,1,0) and test the following ARIMA orders:
@@ -1228,7 +1244,7 @@ Among the tested ARIMA configurations, the ARIMA(0, 1, 1) model is the most pars
 To validate the adequacy of the best non-seasonal model (ARIMA(0,1,1)), we analyzed its residuals.
 <div align="center">
   <img src="figures/arima_residuals.png" alt="Residuals plot of the ARIMA(0,1,1) model" width="500"/>
-  <p><em>Figure 18. Residuals plot of the ARIMA(0,1,1) model</em></p>
+  <p><em>Figure 19. Residuals plot of the ARIMA(0,1,1) model</em></p>
 </div>
 The residuals oscillate around zero with no obvious trend or seasonal pattern, which is a good indication of model adequacy.
 
@@ -1304,7 +1320,7 @@ The best-performing model is SARIMA(0,1,1)(1,1,0,12), with the lowest AIC = 703.
 After identifying SARIMA(0,1,1)(1,1,0)[12] as the best model, we examined the residuals to assess model adequacy.
 <div align="center">
   <img src="figures/sarima_residuals.png" alt="Residuals plot of the SARIMA(0,1,1)(1,1,0,12) model" width="500"/>
-  <p><em>Figure 19. Residuals plot of the SARIMA(0,1,1)(1,1,0,12) model</em></p>
+  <p><em>Figure 20. Residuals plot of the SARIMA(0,1,1)(1,1,0,12) model</em></p>
 </div>
 Residuals fluctuate around zero without obvious trend or seasonal pattern, indicating that the model captures the overall dynamics of the data.
 
@@ -1358,7 +1374,7 @@ To evaluate the model's generalization ability, we split the time series into 80
 
 <div align="center">
   <img src="figures/forecast_sarima.png" alt="Forecast vs Actuals SARIMA(0,1,1)(1,1,0,12)" width="500"/>
-  <p><em>Figure 20. Forecast vs Actuals SARIMA(0,1,1)(1,1,0,12)</em></p>
+  <p><em>Figure 21. Forecast vs Actuals SARIMA(0,1,1)(1,1,0,12)</em></p>
 </div>
 The model does not perform well. We can see a sort of resemblance between the 2 lines, if we shift the orange line back one month, the two curves would follow the same general direction.
 
