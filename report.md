@@ -1,10 +1,16 @@
 ---
 header-includes:
   - \usepackage{float}
-  - \restylefloat{figure}  # makes all figures non-floating by default
+  - \restylefloat{table}
+  - \usepackage[left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}
+  - \AtBeginEnvironment{table}{\renewcommand{\thetable}{}\renewcommand{\tablename}{}}
 ---
 
 # House Price Prediction Project
+
+Aurélie Wasem & Marcelo Tavares
+
+---
 
 ## Abstract
 
@@ -13,6 +19,7 @@ This report presents a complete statistical modeling pipeline applied to housing
 ## Introduction
 
 The objective of this project is to predict house prices and understand the influence of different variables on these prices. The analysis involves:
+
 - Preprocessing a real estate dataset to handle missing values and categorical variables.
 - Selecting relevant features using statistical techniques.
 - Building predictive models using `regression`, `ANOVA`, and time series methods.
@@ -41,7 +48,9 @@ We computed the `Pearson correlation matrix` of all numeric and one-hot-encoded 
 We trained a `RandomForestRegressor` on the encoded dataset to estimate the importance of each feature in predicting `SalePrice`.
 We extracted the top 20 most important features, visualized via a barplot, and retained all features with importance > 0.01.
 
-![Barplot of the importance of features](./figures/importance_barplot.png)
+|![Barplot of the importance of features](./figures/importance_barplot.png)|
+|:-:|
+|Figure 1: Barplot of the importance of features|
 
 #### Re-encoding Ordinal Values\
 
@@ -57,29 +66,53 @@ This allowed us to retain their natural order while simplifying the model and in
 To better understand the distribution of each feature and its relationship with the target variable `SalePrice`, we performed the following visualizations.  
 For each variable, we plotted a boxplot. That helps us to detect outliers, skewness, distribution shape and highlight potential preprocessing needs.
 
-![Boxplot of the GarageCars variable](./figures/garagecars_boxplot.png){ width=0.3\textwidth }
+|![Boxplot of the GarageCars variable](./figures/garagecars_boxplot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 2: Boxplot of the GarageCars variable|
 
-![Boxplot of the GrLivArea variable](./figures/grlivarea_boxplot.png){ width=0.3\textwidth }
+|![Boxplot of the GrLivArea variable](./figures/grlivarea_boxplot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 3: Boxplot of the GrLivArea variable|
 
-![Boxplot of the TotalBsmtSF variable](./figures/totalbsmtflr_boxplot.png){ width=0.3\textwidth }
+|![Boxplot of the TotalBsmtSF variable](./figures/totalbsmtflr_boxplot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 4: Boxplot of the TotalBsmtSF variable|
 
-![Boxplot of the YearBuilt variable](./figures/yearbuilt_boxplot.png){ width=0.3\textwidth }
+|![Boxplot of the YearBuilt variable](./figures/yearbuilt_boxplot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 5: Boxplot of the YearBuilt variable|
 
-![Boxplot of the BsmtFinSF variable](./figures/bsmtfinsf_boxplot.png){ width=0.3\textwidth }
+|![Boxplot of the BsmtFinSF variable](./figures/bsmtfinsf_boxplot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 6: Boxplot of the BsmtFinSF variable|
 
-![Boxplot of the YearRemodAdd variable](./figures/yearremodadd_boxplot.png){ width=0.3\textwidth }
+|![Boxplot of the YearRemodAdd variable](./figures/yearremodadd_boxplot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 7: Boxplot of the YearRemodAdd variable|
 
-![Boxplot of the 2ndFlrSF variable](./figures/2ndflrsf_boxplot.png){ width=0.3\textwidth }
+|![Boxplot of the 2ndFlrSF variable](./figures/2ndflrsf_boxplot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 8: Boxplot of the 2ndFlrSF variable|
 
-![Boxplot of the LotArea variable](./figures/lotarea_boxplot.png){ width=0.3\textwidth }
+|![Boxplot of the LotArea variable](./figures/lotarea_boxplot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 9: Boxplot of the LotArea variable|
 
-![Boxplot of the FullBath variable](./figures/fullbath_boxplot.png){ width=0.3\textwidth }
+|![Boxplot of the FullBath variable](./figures/fullbath_boxplot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 10: Boxplot of the FullBath variable|
 
-![Boxplot of the ExterQual variable](./figures/exterqual_boxplot.png){ width=0.3\textwidth }
+|![Boxplot of the ExterQual variable](./figures/exterqual_boxplot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 11: Boxplot of the ExterQual variable|
 
-![Boxplot of the OverallQual variable](./figures/overallqual_boxplot.png){ width=0.3\textwidth }
+|![Boxplot of the OverallQual variable](./figures/overallqual_boxplot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 12: Boxplot of the OverallQual variable|
 
-![Boxplot of the SalePrice variable](./figures/saleprice_boxplot.png){ width=0.3\textwidth}
+|![Boxplot of the SalePrice variable](./figures/saleprice_boxplot.png){ width=0.3\textwidth}|
+|:-:|
+|Figure 13: Boxplot of the SalePrice variable|
 
 
 ### Data Preprocessing 2.0
@@ -141,6 +174,7 @@ Notes:
 strong multicollinearity or other numerical problems.
 ```
 
+
 The high $R^2$ and significant p-value of the `F-statistic` suggests that the model already explains a substantial portion of the variability in house prices.
 Only the `2ndFlrSF` is not significant given the t-test results. The statistical test `Jarque-Bera` tells us that the residuals are not normally distributed ($\text{p-value} < 0.05$). The `Durbin-Watson` test suggests no autocorrelation in residuals ($\text{Durbin-Watson} \approx 2$).
 
@@ -153,7 +187,7 @@ We have done some basic statistics on our variables like `mean` and `variance`. 
 \resizebox{\textwidth}{!}{
 \begin{tabular}{r l r r r r r r r l}
 \hline
- & Mean & Variance & Coefficient & CI 95\% Lower & CI 95\% Upper & T-statistic (H0: impact) & P-value & Significant ?\\ \hline
+ & Variable & Mean & Variance & Coefficient & CI 95\% Lower & CI 95\% Upper & T-statistic (H0: impact) & P-value & Significant ?\\ \hline
 0 & GarageCars & 1.7067 & 0.5010 & 53519.43 & 50127.99 & 56910.88 & 30.959 & 0.0 & Yes \\
 1 & GrLivArea & 1440.59 & 178027 & 95.43 & 90.03 & 100.84 & 34.64 & 0.0 & Yes \\
 2 & TotalBsmtSF & 1030.85 & 107143 & 101.91 & 93.98 & 109.84 & 25.21 & 0.0 & Yes \\
@@ -169,7 +203,6 @@ We have done some basic statistics on our variables like `mean` and `variance`. 
 \hline
 \end{tabular}
 }
-\caption{Tableau ajusté à la largeur de la page}
 \label{tab:stats}
 \end{table}
 
@@ -237,7 +270,6 @@ To evaluate the statistical significance of each binary factor and their interac
 \hline
 \end{tabular}
 }
-\caption{Tableau ANOVA avec somme des carrés (SS), degrés de liberté (DF), statistique F, p-value, moyenne des carrés (MS) et signification}
 \label{tab:anova}
 \end{table}
 
@@ -251,7 +283,8 @@ The residual sum of squares is relatively low, indicating good explanatory power
 
 Following the `factorial ANOVA`, we constructed a reduced `linear regression model` using only the variables and interaction terms that showed statistical significance ($\text{p-value} < 0.05$). This model aims to improve interpretability while retaining explanatory power.
 This gave us the following formula: 
-> $SalePrice \sim GarageCars + GrLivArea + TotalBsmtSF + YearBuilt+ GarageCars \times GrLivArea + GarageCars \times YearBuilt$
+$$SalePrice \sim GarageCars + GrLivArea + TotalBsmtSF + $$
+$$+YearBuilt+ GarageCars \times GrLivArea + GarageCars \times YearBuilt$$
 
 ```plaintext
                                  OLS Regression Results                            
@@ -300,7 +333,7 @@ We reused the binarisation done previously for the 11 factors used in this desig
 
 For each row of the factorial plan, we searched for matching observations in the real dataset. If a match was found, the mean `SalePrice` was computed and retained.
 
-**Results**  
+*Results*  
 Due to the sparsity of real data, only a subset of combinations was matched successfully.
 This design captures all main effects and all possible interactions among the 11 variables.
 It provides a complete framework for variance decomposition and effect estimation, although model complexity must be controlled to avoid overfitting.
@@ -332,7 +365,6 @@ To fully exploit the interaction between 11 binarized features, we applied an `A
 \hline
 \end{tabular}
 }
-\caption{Tableau ANOVA avec somme des carrés (SS), degrés de liberté (DF), statistique F, p-value, moyenne des carrés (MS) et signification}
 \label{tab:anova}
 \end{table}
 
@@ -341,7 +373,8 @@ The only non-significant factor is `FullBath_bin`, suggesting minimal impact of 
 
 #### Reduced Regression Model\
 Using the variables identified as statistically significant in the full factorial $2^{11}$ `ANOVA`, we built a refined `linear regression model` to predict `SalePrice` following the formula: 
-> $SalePrice\sim GarageCars+GrLivArea+TotalBsmtSF+YearBuilt+BsmtFinSF1+YearRemodAdd+SecondFlrSF+LotArea+ExterQual+OverallQual$
+$$SalePrice\sim GarageCars+GrLivArea+TotalBsmtSF+YearBuilt+ $$
+$$+BsmtFinSF1+YearRemodAdd+SecondFlrSF+LotArea+ExterQual+OverallQual$$
 
 ```plaintext
                             OLS Regression Results                            
@@ -412,7 +445,6 @@ To ensure that `SecondFlrSF` is insignificant, we decided to also run an `ANOVA`
 \hline
 \end{tabular}
 }
-\caption{Tableau ANOVA avec somme des carrés (SS), degrés de liberté (DF), statistique F, p-value, moyenne des carrés (MS) et signification}
 \label{tab:anova}
 \end{table}
 
@@ -422,7 +454,8 @@ The `ANOVA` confirms that most variables in the model contribute significantly t
 #### Final Regression Model\
 
 Removing the variable identified as not statistically significant in the previous `OLS` and `ANOVA` models, we built a refined `linear regression model` to predict `SalePrice` following the formula: 
-> $SalePrice\sim GarageCars+GrLivArea+TotalBsmtSF+YearBuilt+BsmtFinSF1+YearRemodAdd+LotArea+ExterQual+OverallQual$
+$$SalePrice\sim GarageCars+GrLivArea+TotalBsmtSF+YearBuilt+ $$
+$$+BsmtFinSF1+YearRemodAdd+LotArea+ExterQual+OverallQual$$
 
 ```plaintext
                             OLS Regression Results                            
@@ -469,7 +502,10 @@ The statistical test `Jarque-Bera` tells us that the residuals are not normally 
 #### Predicted Values vs Actual Values\
 To evaluate how well the final regression model predicts housing prices, we applied it to the full cleaned dataset and compared the predicted values with the actual sale prices.
 
-![Comparison between predicted and real values](./figures/comparison_real_predicted.png){ width=0.3\textwidth }
+|![Comparison between predicted and real values](./figures/comparison_real_predicted.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 14: Comparison between predicted and real values| 
+
 
 The scatterplot shows a clear alignment of predicted values along the diagonal red dashed line, representing perfect prediction.
 
@@ -489,10 +525,13 @@ To model the temporal dynamics of housing prices, we constructed a monthly time 
 
 The figure below shows the monthly average house sale price over the period covered in the dataset (2006–2010)
 
-![Temporal series plot of the sale price](./figures/temporal_series_plot.png){ width=0.3\textwidth }
+|![Temporal series plot of the sale price](./figures/temporal_series_plot.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 15: Temporal series plot of the sale price|
 
 
 *Observations:*
+
 - The series exhibits strong variability, with spikes in prices around 2006, 2007, 2008 and 2010.
 - There is no clear seasonality pattern at first glance, but some periodic fluctuations could indicate latent seasonality.
 - There is no clear trend pattern.
@@ -501,8 +540,9 @@ The figure below shows the monthly average house sale price over the period cove
 
 To better understand the components driving the variation in monthly average house prices, we applied an additive seasonal decomposition with a 12-month periodicity.
 
-![Seasonal decomposition of the time series plot of the sale price](./figures/seasonal_decomposition.png){ width=0.3\textwidth }
-
+|![Seasonal decomposition of the time series plot of the sale price](./figures/seasonal_decomposition.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 16: Seasonal decomposition of the time series plot of the sale price|
 
 *Trend*
 
@@ -525,28 +565,32 @@ To assess the stationarity of the average house sale price series, we applied a 
 
 *Differencing*  
 We computed the `first difference`: 
-> $Y_t^{\prime}=Y_t-Y_{t-1}$.
+$$Y_t^{\prime}=Y_t-Y_{t-1}$$
 
 This transformation removes trend components and helps stabilize the mean of the series over time.
 
-![Plot of the first differenciation of the series](./figures/first_difference.png){ width=0.3\textwidth }
-
+|![Plot of the first differenciation of the series](./figures/first_difference.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 17: Plot of the first differenciation of the series|
 
 The values oscillate around 0, indicating that the global trend has been removed, as expected from differencing.
 
 *Trend test via Linear Regression*  
-We ran a `linear regression` on both the original and the differenced series against time to test for a significant trend and obtained the following p-values $0.025$ (without differentiation) and $0.671$ (with differentiation). The original time series has a statistically significant upward/downward trend, while the differenced series does not. This suggests that first differencing (d = 1) is sufficient to achieve trend stationarity.
+We ran a `linear regression` on both the original and the differenced series against time to test for a significant trend and obtained the following p-values $0.025$ (without differentiation) and $0.671$ (with differentiation). The original time series has a statistically significant upward/downward trend, while the differenced series does not. This suggests that first differencing ($d = 1$) is sufficient to achieve trend stationarity.
 
 #### Combined Difference\
 
-To remove both trend and seasonal effects from the average monthly house sale price series, we applied a `combined differencing operator`:
-> $(1-B)(1-B^{12})Y_t = Y_t-Y_{t-1} - Y_{t-12} + Y_{t-13}$​
+To remove both trend and seasonal effects from the average monthly house sale price series, we applied a `combined differencing operator`: 
+$$ (1 - B)(1 - B^{12})Y_t = Y_t - Y_{t-1} - Y_{t-12} + Y_{t-13} $$
 
 This transformation is necessary when a time series shows both:
+
 - Non-stationarity in level (trend)
 - Repeating seasonal fluctuations (yearly pattern with monthly data).
 
-![Combined difference plot of the time series of the sale price](./figures/combined_difference.png){ width=0.3\textwidth }
+|![Combined difference plot of the time series of the sale price](./figures/combined_difference.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 18: Combined difference plot of the time series of the sale price|
 
 
 The series now oscillates around zero with no visible trend and no apparent seasonality, indicating that the series is fully stationarized.
@@ -561,9 +605,12 @@ Based on this transformation, we set:
 
 To identify suitable orders for the `ARIMA` model, we examined the `autocorrelation function (ACF)` and `partial autocorrelation function (PACF)` of the series after combined first and seasonal differencing.
 
-![ACF/PACF of the combined differenced series](./figures/combined_acf_pacf.png){ width=0.3\textwidth }
+|![ACF/PACF of the combined differenced series](./figures/combined_acf_pacf.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 19: ACF/PACF of the combined differenced series|
 
 From the `ACF` and `PACF` we can't see any `AR/MA structure`. So we will start with an `ARIMA model (0,1,0)` and test the following `ARIMA` orders:
+
 - `ARIMA(1,1,0)`
 - `ARIMA(0,1,1)`
 - `ARIMA(1,1,1)`
@@ -583,7 +630,6 @@ To identify the best-fitting non-seasonal `ARIMA` model, we tested multiple orde
 0 & (0, 1, 0) & 1235.623413 & 1237.612397 \\
 \hline
 \end{tabular}
-\caption{Comparaison des modèles ARIMA selon AIC et BIC}
 \label{tab:arima}
 \end{table}
 
@@ -592,7 +638,10 @@ Among the tested `ARIMA` configurations, the `ARIMA(0, 1, 1)` model is the most 
 ##### Residuals\
 To validate the adequacy of the best non-seasonal model (`ARIMA(0,1,1)`), we analyzed its residuals.
 
-![Residuals plot of the ARIMA(0,1,1) model](./figures/arima_residuals.png){ width=0.3\textwidth }
+|![Residuals plot of the ARIMA(0,1,1) model](./figures/arima_residuals.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 20: Residuals plot of the ARIMA(0,1,1) model|
+
 
 The residuals oscillate around zero with no obvious trend or seasonal pattern, which is a good indication of model adequacy.
 
@@ -605,7 +654,7 @@ In conclusion, the `ARIMA(0,1,1)` model is well specified. The residuals show no
 #### SARIMA Configuration\
 To incorporate potential seasonal dynamics, we estimated multiple `SARIMA` models combining the previously optimal non-seasonal structure `ARIMA(0,1,1)` with various seasonal components.
 
-\begin{table}[ht]
+\begin{table}[H]
 \centering
 \begin{tabular}{r l l r r}
 \hline
@@ -617,7 +666,6 @@ To incorporate potential seasonal dynamics, we estimated multiple `SARIMA` model
 2 & (0, 1, 1) & (1, 1, 1, 12) & 1267.780954 & 1273.109772 \\
 \hline
 \end{tabular}
-\caption{Comparaison des modèles SARIMA selon AIC et BIC}
 \label{tab:sarima}
 \end{table}
 
@@ -626,7 +674,9 @@ The best-performing model is `SARIMA(0,1,1)(1,1,0,12)`, with the lowest `AIC = 7
 ##### Residuals\
 After identifying `SARIMA(0,1,1)(1,1,0,12)` as the best model, we examined the residuals to assess model adequacy.
 
-![Residuals plot of the SARIMA(0,1,1)(1,1,0,12) model](./figures/sarima_residuals.png){ width=0.3\textwidth }
+|![Residuals plot of the SARIMA(0,1,1)(1,1,0,12) model](./figures/sarima_residuals.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 21: Residuals plot of the SARIMA(0,1,1)(1,1,0,12) model|
 
 Residuals fluctuate around zero without obvious trend or seasonal pattern, indicating that the model captures the overall dynamics of the data.
 
@@ -678,7 +728,9 @@ The model is statistically well-specified, with no residual autocorrelation (p-v
 #### SARIMA Model Prediction\
 To evaluate the model's generalization ability, we split the time series into 80% training data and 20% testing data, and applied `rolling forecast` using the `SARIMA(0,1,1)(1,1,0,12)` model.
 
-![Forecast vs Actuals SARIMA(0,1,1)(1,1,0,12)](./figures/forecast_sarima.png){ width=500px }
+|![Forecast vs Actuals SARIMA(0,1,1)(1,1,0,12)](./figures/forecast_sarima.png){ width=0.3\textwidth }|
+|:-:|
+|Figure 22: Forecast vs Actuals SARIMA(0,1,1)(1,1,0,12)|
 
 The model does not perform well. We can see a kind of resemblance between the two lines, if we shift the orange line back one month, the two curves would follow the same general direction.
 
